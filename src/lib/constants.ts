@@ -71,17 +71,17 @@ export function labelOf(list: readonly { key: string; label: string }[], key: st
 }
 
 export const STATUS_COLORS: Record<string, string> = {
-  ideia: "bg-slate-100 text-slate-700",
-  guiao: "bg-violet-100 text-violet-700",
-  gravacao: "bg-amber-100 text-amber-800",
-  edicao: "bg-orange-100 text-orange-800",
-  aprovacao: "bg-pink-100 text-pink-700",
-  agendado: "bg-cyan-100 text-cyan-800",
-  publicado: "bg-emerald-100 text-emerald-700",
-  pendente: "bg-slate-100 text-slate-700",
-  em_curso: "bg-amber-100 text-amber-800",
-  feito: "bg-emerald-100 text-emerald-700",
-  nao_feito: "bg-rose-100 text-rose-700",
+  ideia: "bg-slate-400/15 text-slate-300",
+  guiao: "bg-violet/20 text-[#a993ff]",
+  gravacao: "bg-amber-400/15 text-amber-300",
+  edicao: "bg-orange-400/15 text-orange-300",
+  aprovacao: "bg-magenta/15 text-[#ff7aa8]",
+  agendado: "bg-cyan/15 text-cyan",
+  publicado: "bg-emerald-400/15 text-emerald-300",
+  pendente: "bg-slate-400/15 text-slate-300",
+  em_curso: "bg-amber-400/15 text-amber-300",
+  feito: "bg-emerald-400/15 text-emerald-300",
+  nao_feito: "bg-magenta/15 text-[#ff7aa8]",
 };
 
 export function slugify(s: string) {

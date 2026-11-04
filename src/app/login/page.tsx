@@ -47,13 +47,13 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-ink px-4">
+    <main className="flex min-h-screen items-center justify-center bg-bg px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="font-display text-3xl font-bold text-white">
             dyvi<span className="text-cyan">.</span>
           </div>
-          <p className="mt-1 text-sm text-slate-400">Plataforma de gestão</p>
+          <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-cyan">Growth Studio · Plataforma</p>
         </div>
         <form onSubmit={submit} className="card space-y-4">
           <h1 className="h2">
@@ -80,7 +80,7 @@ export default function LoginPage() {
           <button className="btn w-full" disabled={loading}>
             {loading ? "Um momento..." : mode === "entrar" ? "Entrar" : mode === "criar" ? "Criar conta" : "Enviar link"}
           </button>
-          <div className="flex justify-between text-xs text-slate-500">
+          <div className="flex justify-between text-xs text-muted">
             {mode !== "entrar" ? (
               <button type="button" onClick={() => setMode("entrar")}>Já tenho conta</button>
             ) : (
