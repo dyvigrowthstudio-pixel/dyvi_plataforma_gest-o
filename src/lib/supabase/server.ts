@@ -1,5 +1,4 @@
 import { createServerClient } from "@supabase/ssr";
-import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 export async function createClient() {
@@ -24,14 +23,4 @@ export async function createClient() {
       },
     }
   );
-}
-
-// Cliente com a chave secreta, usado apenas no servidor para enviar convites.
-// A chave fica só nas variáveis de ambiente da Vercel.
-export function createServiceClient() {
-  const key = process.env.SUPABASE_SECRET_KEY;
-  if (!key) return null;
-  return createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
 }
