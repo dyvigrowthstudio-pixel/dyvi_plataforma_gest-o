@@ -15,8 +15,9 @@ export default async function Shell({
   current?: { slug: string; name: string; modules: string[]; isStaff: boolean } | null;
   children: React.ReactNode;
 }) {
-  const { supabase, profile } = await getMe();
+  const { supabase, profile, profileError, user } = await getMe();
   const { data: orgs } = await supabase.from("organizations").select("name, slug, color").order("name");
+  const projectRef = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace("https://", "").split(".")[0];
   const isAdmin = profile?.role === "admin";
   const isStaffAnywhere = profile?.role === "admin" || profile?.role === "team";
   const name = profile?.full_name || profile?.email?.split("@")[0] || "";
@@ -39,6 +40,14 @@ export default async function Shell({
           </form>
         </header>
         <main className="flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_top_right,rgba(124,92,255,0.08),transparent_50%)] px-8 py-6">
+          {!profile && (
+            <div className="mb-6 rounded-2xl border border-magenta/40 bg-magenta/10 p-4 text-sm text-slate-200">
+              <div className="font-semibold text-white">A plataforma não está a conseguir ler o teu perfil.</div>
+              <div className="mt-1 font-mono text-xs text-slate-300">
+                conta: {user.email || user.id} · base de dados: {projectRef || "não definida"} · erro: {profileError ?? "perfil não encontrado"}
+              </div>
+            </div>
+          )}
           {children}
         </main>
       </div>

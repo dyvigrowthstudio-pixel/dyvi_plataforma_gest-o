@@ -261,6 +261,11 @@ create policy "tasks client update" on public.tasks for update
   using (public.can_view(org_id) and owner_side = 'cliente')
   with check (public.can_view(org_id) and owner_side = 'cliente');
 
+-- Permissões base (a RLS acima decide o que cada pessoa vê)
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant execute on all functions in schema public to authenticated;
+
 -- Índices
 create index if not exists posts_org_date on public.posts (org_id, scheduled_at);
 create index if not exists themes_org_month on public.monthly_themes (org_id, month);
