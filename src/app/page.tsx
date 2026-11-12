@@ -8,7 +8,7 @@ import { STATUS_COLORS, POST_STATUS, NETWORKS, labelOf } from "@/lib/constants";
 import { addDays, fmtTime, fmtWeekday, lisbonParts, rangeIso, todayLisbon, weekStart } from "@/lib/dates";
 
 export default async function Painel() {
-  const { supabase, profile } = await getMe();
+  const { supabase, profile, user } = await getMe();
   const isAdmin = profile?.role === "admin";
   const isClient = profile?.role === "client";
 
@@ -23,10 +23,14 @@ export default async function Painel() {
   const we = addDays(ws, 7);
   const r = rangeIso(ws, we);
 
-  const [{ data: posts }, { data: tasks }, { count: ideasOpen }] = await Promise.all([
+  const isStaffRole = profile?.role === "admin" || profile?.role === "team";
+  const [{ data: posts }, { data: tasks }, { count: ideasOpen }, { data: myInternal }] = await Promise.all([
     supabase.from("posts").select("id, title, network, status, scheduled_at, org_id").gte("scheduled_at", r.from).lt("scheduled_at", r.to).order("scheduled_at"),
     supabase.from("tasks").select("id, title, owner_side, due_date, org_id, status").neq("status", "feito").order("due_date", { nullsFirst: false }),
     supabase.from("ideas").select("id", { count: "exact", head: true }).in("status", ["pendente", "em_curso"]),
+    isStaffRole
+      ? supabase.from("internal_tasks").select("id, title, due_date, org_id").eq("assignee_id", user.id).neq("status", "feito").order("due_date", { nullsFirst: false }).limit(12)
+      : Promise.resolve({ data: [] as { id: string; title: string; due_date: string | null; org_id: string }[] }),
   ]);
 
   const weekPosts = (posts ?? []).filter((p) => {
@@ -66,6 +70,37 @@ export default async function Painel() {
         <Stat icon={ListChecks} value={dyviTasks.length} label="Tarefas da Dyvi por fazer" tone="magenta" tag={`${clientTasks.length} do cliente`} />
         <Stat icon={Lightbulb} value={ideasOpen ?? 0} label="Ideias por trabalhar" tone="emerald" tag="abertas" />
       </div>
+
+        {isStaffRole && (
+          <section className="card mt-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="h2">As minhas tarefas internas</h2>
+              <span className="text-xs text-muted">só a equipa vê</span>
+            </div>
+            {(myInternal ?? []).length === 0 ? (
+              <Empty>Nada atribuído a ti.</Empty>
+            ) : (
+              <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                {(myInternal ?? []).map((t) => {
+                  const o = orgById[t.org_id];
+                  const late = t.due_date && t.due_date < today;
+                  return (
+                    <Link key={t.id} href={`/c/${o?.slug}/interno`} className="flex items-start gap-3 rounded-xl border border-line bg-panel px-3 py-2.5 hover:border-cyan/40">
+                      <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: o?.color ?? "#31C2E1" }} />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-white">{t.title}</div>
+                        <div className="text-xs text-muted">
+                          {o?.name}
+                          {t.due_date && <span className={late ? "font-bold text-magenta" : ""}> · até {t.due_date.split("-").reverse().join("/")}</span>}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
 
       <div className="mt-6 grid gap-6 xl:grid-cols-3">
         <section className="card xl:col-span-2">

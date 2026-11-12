@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { DEFAULT_BRAND_SECTIONS, slugify } from "@/lib/constants";
+import { DEFAULT_BRAND_SECTIONS, ONBOARDING_CHECKLIST, slugify } from "@/lib/constants";
 
 const s = (fd: FormData, k: string) => {
   const v = fd.get(k);
@@ -359,4 +359,61 @@ export async function updatePassword(fd: FormData) {
   if (password.length < 8) return;
   await supabase.auth.updateUser({ password });
   redirect("/conta?ok=1");
+}
+
+// ---------- Checklist interna (só equipa Dyvi) ----------
+function addDaysIso(n: number) {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+export async function saveInternalTask(fd: FormData) {
+  const supabase = await db();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const row = {
+    org_id: s(fd, "org_id"),
+    title: s(fd, "title"),
+    description: orNull(s(fd, "description")),
+    assignee_id: orNull(s(fd, "assignee_id")),
+    due_date: orNull(s(fd, "due_date")),
+  };
+  if (!row.title) return;
+  const id = s(fd, "id");
+  if (id) await supabase.from("internal_tasks").update(row).eq("id", id);
+  else await supabase.from("internal_tasks").insert({ ...row, created_by: user?.id });
+  refresh(s(fd, "slug"));
+}
+
+export async function setInternalTaskStatus(fd: FormData) {
+  const supabase = await db();
+  await supabase.from("internal_tasks").update({ status: s(fd, "status") }).eq("id", s(fd, "id"));
+  refresh(s(fd, "slug"));
+}
+
+export async function deleteInternalTask(fd: FormData) {
+  const supabase = await db();
+  await supabase.from("internal_tasks").delete().eq("id", s(fd, "id"));
+  refresh(s(fd, "slug"));
+}
+
+export async function loadOnboardingChecklist(fd: FormData) {
+  const supabase = await db();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const org_id = s(fd, "org_id");
+  const assignee_id = orNull(s(fd, "assignee_id"));
+  await supabase.from("internal_tasks").insert(
+    ONBOARDING_CHECKLIST.map((i) => ({
+      org_id,
+      title: i.title,
+      assignee_id,
+      due_date: addDaysIso(i.days),
+      created_by: user?.id,
+    }))
+  );
+  refresh(s(fd, "slug"));
 }

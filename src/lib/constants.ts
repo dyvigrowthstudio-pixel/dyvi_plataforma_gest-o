@@ -51,6 +51,20 @@ export const TASK_STATUS = [
   { key: "feito", label: "Feito" },
 ] as const;
 
+// Checklist de arranque de um cliente novo (carregável com um clique)
+export const ONBOARDING_CHECKLIST = [
+  { title: "Acesso ao Meta Business Suite (página e conta de anúncios)", days: 3 },
+  { title: "Ligar Instagram e Facebook ao Meta Business", days: 3 },
+  { title: "Acesso ao Google Business Profile", days: 5 },
+  { title: "Instalar e validar o Pixel da Meta e os eventos", days: 7 },
+  { title: "Acesso ao Google Analytics e Search Console", days: 7 },
+  { title: "Recolher logótipo, fontes, cores e fotos da marca", days: 5 },
+  { title: "Preencher o hub da marca (missão, SWOT, tom de voz)", days: 7 },
+  { title: "Análise da concorrência", days: 10 },
+  { title: "Definir pilares e temas do primeiro mês", days: 10 },
+  { title: "Reunião de kick off com o cliente", days: 5 },
+] as const;
+
 // Secções criadas automaticamente em cada cliente novo
 export const DEFAULT_BRAND_SECTIONS = [
   { title: "Resumo da marca", kind: "text" },

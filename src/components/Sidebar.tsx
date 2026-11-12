@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ArrowUpRight, LayoutGrid, Users, Sparkles, CalendarDays, Clapperboard, Lightbulb,
-  ListChecks, BarChart3, Settings, UserCircle, Gem, Building2,
+  ListChecks, BarChart3, Settings, UserCircle, Gem, Building2, Lock,
 } from "lucide-react";
 import { MODULES } from "@/lib/constants";
 
@@ -77,6 +77,7 @@ export default function Sidebar({ orgs, current, isAdmin, isStaffAnywhere }: Pro
           {MODULES.filter((m) => current.modules.includes(m.key)).map((m) => (
             <Item key={m.key} href={`/c/${current.slug}/${m.key}`} icon={MODULE_ICONS[m.key]} label={m.label} />
           ))}
+          {current.isStaff && <Item href={`/c/${current.slug}/interno`} icon={Lock} label="Checklist interna" />}
           {current.isStaff && <Item href={`/c/${current.slug}/definicoes`} icon={Settings} label="Definições do cliente" />}
         </Section>
       )}
