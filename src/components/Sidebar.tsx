@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ArrowUpRight, LayoutGrid, Users, Sparkles, CalendarDays, Clapperboard, Lightbulb,
-  ListChecks, BarChart3, Settings, UserCircle, Gem, Building2, Lock,
+  ListChecks, BarChart3, Settings, UserCircle, Gem, Building2, Lock, DatabaseBackup,
 } from "lucide-react";
 import { MODULES } from "@/lib/constants";
 
@@ -100,6 +100,7 @@ export default function Sidebar({ orgs, current, isAdmin, isStaffAnywhere }: Pro
       <Section title="Configuração">
         <Item href="/conta" icon={UserCircle} label="A minha conta" />
         {isAdmin && <Item href="/equipa" icon={Users} label="Equipa" />}
+        {isAdmin && <Item href="/backups" icon={DatabaseBackup} label="Backups" />}
       </Section>
     </aside>
   );
