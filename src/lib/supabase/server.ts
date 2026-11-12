@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 export async function createClient() {
@@ -23,4 +24,14 @@ export async function createClient() {
       },
     }
   );
+}
+
+// Cliente com a chave secreta (só no servidor). Usado apenas para encontrar
+// o email associado a um nome de utilizador no login, sem o expor ao browser.
+export function createServiceClient() {
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!key) return null;
+  return createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }

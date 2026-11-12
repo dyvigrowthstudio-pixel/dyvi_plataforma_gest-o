@@ -2,7 +2,7 @@ import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export type Profile = { id: string; email: string; full_name: string | null; role: "admin" | "team" | "client" };
+export type Profile = { id: string; email: string; username: string | null; full_name: string | null; role: "admin" | "team" | "client" };
 export type Org = { id: string; name: string; slug: string; color: string | null; modules: string[] };
 
 // Uma única verificação por pedido, partilhada por todas as partes da página

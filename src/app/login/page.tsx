@@ -1,50 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useActionState, useState } from "react";
+import { recover, signIn, signUp, type LoginState } from "./actions";
 
 type Mode = "entrar" | "criar" | "recuperar";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [mode, setMode] = useState<Mode>("entrar");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [inState, inAction, inPending] = useActionState<LoginState, FormData>(signIn, null);
+  const [upState, upAction, upPending] = useActionState<LoginState, FormData>(signUp, null);
+  const [reState, reAction, rePending] = useActionState<LoginState, FormData>(recover, null);
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setMsg(null);
-    const supabase = createClient();
-    const origin = window.location.origin;
-
-    if (mode === "entrar") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setMsg({ ok: false, text: "Email ou password incorretos, ou conta ainda por confirmar." });
-      else {
-        router.push("/");
-        router.refresh();
-      }
-    } else if (mode === "criar") {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: `${origin}/auth/callback` },
-      });
-      if (error) setMsg({ ok: false, text: error.message });
-      else setMsg({ ok: true, text: "Conta criada. Confirma o email com o link que te enviámos." });
-    } else {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${origin}/auth/callback?next=/conta`,
-      });
-      if (error) setMsg({ ok: false, text: error.message });
-      else setMsg({ ok: true, text: "Enviámos um link para definires uma password nova." });
-    }
-    setLoading(false);
-  }
+  const msg = mode === "entrar" ? inState : mode === "criar" ? upState : reState;
+  const pending = mode === "entrar" ? inPending : mode === "criar" ? upPending : rePending;
+  const action = mode === "entrar" ? inAction : mode === "criar" ? upAction : reAction;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-bg px-4">
@@ -55,30 +24,56 @@ export default function LoginPage() {
           </div>
           <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-cyan">Growth Studio · Plataforma</p>
         </div>
-        <form onSubmit={submit} className="card space-y-4">
+        <form key={mode} action={action} className="card space-y-4">
           <h1 className="h2">
-            {mode === "entrar" ? "Entrar" : mode === "criar" ? "Criar conta" : "Recuperar password"}
+            {mode === "entrar" ? "Entrar" : mode === "criar" ? "Primeiro acesso" : "Recuperar password"}
           </h1>
-          <div>
-            <label className="label">Email</label>
-            <input className="input" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
+
+          {mode === "criar" ? (
+            <>
+              <div>
+                <label className="label">Email</label>
+                <input name="email" className="input" type="email" required autoComplete="email" />
+              </div>
+              <div>
+                <label className="label">Nome de utilizador</label>
+                <input
+                  name="username"
+                  className="input"
+                  required
+                  minLength={3}
+                  maxLength={30}
+                  pattern="[a-zA-Z0-9._\-]+"
+                  placeholder="ex.: rui"
+                  autoComplete="username"
+                />
+              </div>
+            </>
+          ) : (
+            <div>
+              <label className="label">Nome de utilizador</label>
+              <input name="identifier" className="input" required autoComplete="username" autoCapitalize="none" placeholder="ou email" />
+            </div>
+          )}
+
           {mode !== "recuperar" && (
             <div>
               <label className="label">Password</label>
               <input
+                name="password"
                 className="input"
                 type="password"
                 required
                 minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                autoComplete={mode === "criar" ? "new-password" : "current-password"}
               />
             </div>
           )}
-          {msg && <p className={`text-sm ${msg.ok ? "text-emerald-600" : "text-rose-600"}`}>{msg.text}</p>}
-          <button className="btn w-full" disabled={loading}>
-            {loading ? "Um momento..." : mode === "entrar" ? "Entrar" : mode === "criar" ? "Criar conta" : "Enviar link"}
+
+          {msg?.text && <p className={`text-sm ${msg.ok ? "text-emerald-300" : "text-[#ff7aa8]"}`}>{msg.text}</p>}
+
+          <button className="btn w-full" disabled={pending}>
+            {pending ? "Um momento..." : mode === "entrar" ? "Entrar" : mode === "criar" ? "Criar conta" : "Enviar link"}
           </button>
           <div className="flex justify-between text-xs text-muted">
             {mode !== "entrar" ? (

@@ -43,7 +43,7 @@ export default async function Equipa() {
                   <tr key={p.id}>
                     <td className="py-3">
                       <div className="font-semibold text-white">{p.full_name || p.email}</div>
-                      <div className="text-xs text-muted">{p.email}</div>
+                      <div className="text-xs text-muted">{p.username ? `@${p.username} · ` : ""}{p.email}</div>
                     </td>
                     <td className="py-3 text-slate-300">
                       {p.role === "admin" ? "Todos" : mine.map((m) => orgName[m.org_id]).join(", ") || "Nenhum"}

@@ -349,8 +349,15 @@ export async function updateProfile(fd: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return;
-  await supabase.from("profiles").update({ full_name: orNull(s(fd, "full_name")) }).eq("id", user.id);
+  const username = s(fd, "username").toLowerCase();
+  if (username && !/^[a-z0-9._-]{3,30}$/.test(username)) redirect("/conta?erro=formato");
+  const { error } = await supabase
+    .from("profiles")
+    .update({ full_name: orNull(s(fd, "full_name")), username: orNull(username) })
+    .eq("id", user.id);
   revalidatePath("/", "layout");
+  if (error) redirect(`/conta?erro=${error.code === "23505" ? "ocupado" : "geral"}`);
+  redirect("/conta?guardado=1");
 }
 
 export async function updatePassword(fd: FormData) {
